@@ -7,11 +7,21 @@ import {
   redirect,
   useNavigate,
 } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { useAuthStore } from '../store/auth'
 import Login from '../pages/Login'
 import Products from '../pages/Products'
 import Layout from '../components/Layout'
-import { useEffect } from 'react'
+
+const RedirectToProductos = () => {
+  const navigate = useNavigate()
+  useEffect(() => {
+    navigate({ to: '/productos', replace: true })
+  }, [navigate])
+  return null
+}
+
+const NotFound = () => <div className="p-4 text-center text-red-600">Página no encontrada</div>
 
 const rootRoute = new RootRoute({
   component: () => <Outlet />,
@@ -33,14 +43,6 @@ const protectedRoute = new Route({
   },
 })
 
-const RedirectToProductos = () => {
-  const navigate = useNavigate()
-  useEffect(() => {
-    navigate({ to: '/productos', replace: true })
-  }, [navigate])
-  return null
-}
-
 const rootRedirectRoute = new Route({
   getParentRoute: () => protectedRoute,
   path: '/',
@@ -53,11 +55,24 @@ const productosRoute = new Route({
   component: Products,
 })
 
+const notFoundRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: '*',
+  component: NotFound,
+})
+
 const routeTree = rootRoute.addChildren([
   loginRoute,
-  protectedRoute.addChildren([rootRedirectRoute, productosRoute]),
+  protectedRoute.addChildren([
+    rootRedirectRoute,
+    productosRoute,
+  ]),
+  notFoundRoute,
 ])
 
-const router = new Router({ routeTree })
+const router = new Router({
+  routeTree,
+  basepath: '/prueba-tecnica-frontend-bama',
+})
 
 export const Routes = () => <RouterProvider router={router} />
